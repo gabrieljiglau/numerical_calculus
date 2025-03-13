@@ -2,26 +2,16 @@ import math
 import numpy as np
 
 
-def get_rows(matrix, n_dims):
-
-    return [[matrix[i][j] for j in range(n_dims)] for i in range(n_dims)]
-
-def get_columns(matrix, n_dims):
-
-    return [[matrix[i][j] for i in range(n_dims)] for j in range(n_dims)]  
-
-
 def build_first_matrix(matrix, precision):
     
     epsilon = 10 ** (-precision)
     numerator = np.transpose(matrix)
     n_dims = len(matrix)
     
-    columns = get_columns(matrix, n_dims)
-    col_max = max(sum(np.abs(col)) for col in columns)  # A_1
 
-    rows = get_rows(matrix, n_dims)
-    row_max = max(sum(np.abs(row)) for row in rows)  # A_inf
+    col_max = np.max(np.sum(np.abs(matrix), axis=0))  # A_1
+
+    row_max = np.max(np.sum(np.abs(matrix), axis=1))  # A_inf
 
     denumerator = col_max * row_max
     if math.fabs(denumerator) > epsilon:
@@ -39,7 +29,7 @@ def is_first_matrix_acceptable(original_matrix, identity_matrix, v0):
 
 def build_empty_matrix(n_dims):
 
-    return [[0 for _ in range(n_dims)] for _ in range(n_dims)]
+    return np.array([[0 for _ in range(n_dims)] for _ in range(n_dims)])
 
 def build_identity_matrix(n_dims):
 
@@ -59,25 +49,14 @@ def build_input_matrix(n_dims):
 
     return arr
 
-def negate_matrix(matrix):
-    return np.array(matrix) * -1
-
-def add_constant_on_diagonal(matrix, constant):
-    
-    for i in range(len(matrix)):
-        matrix[i][i] += constant
-
-    return matrix
 
 def identity_minus_avk(original_matrix, identity_matrix, current_vk, constant):
     
-    negated_matrix = negate_matrix(original_matrix)
-    new_matrix = np.dot(negate_matrix, current_vk)
+    negated_matrix = -original_matrix
+    new_matrix = np.dot(negated_matrix, current_vk)
 
-    if constant == 1:
-        return new_matrix
-
-    return add_constant_on_diagonal(new_matrix, constant)
+    np.fill_diagonal(new_matrix, np.diag(new_matrix) + constant)
+    return new_matrix
 
 def next_matrix_schultz(original_matrix, identity_matrix, current_vk):
 
@@ -125,6 +104,10 @@ def build_next_matrix(original_matrix, identity_matrix, current_vk, method):
         print('Improper method for building the next matrix')
         return -1
 
+def inverse_matrix(n_dims):
+    I, J = np.indices((n_dims, n_dims))
+    inv = np.where(I >= J, (-2.0) ** (I - J), 0)
+    return inv
 
 if __name__ == '__main__':
 
