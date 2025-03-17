@@ -1,30 +1,37 @@
 from utils import *
 
-a1_file_id = '1DPNqhir87-JyFXzq0JZ6PzDRnzARcH8M'
-a2_file_id='1NNbu5IfIlFurroNTMlg6NzQ_5Bww4H_m'
-a3_file_id = '1hc25jCkzH2gefuSmvoU370ggbytYCLRa'
-a4_file_id = '1AZX2nXjfshYSXpK7Td4qSFxTnBa8HDSn'
-a5_file_id = '1Xb8nBaS6aNh4HN0avfK8eOD4iBXu-53G'
+n_dims = [10000, 20000, 30000, 80000, 2025]  # a_plus_b are n_dims = 2025 
 
-b1_file_id = '1EVx6pniErrP6Gkdd0mdo_rzOHsEW7Uul'
-b2_file_id = '1bPSnby7y200XSHFkJlvHKHRwQRBY6Xqe'
-b3_file_id = '1rW72eaWeodzhZ1VxGKKoVU93zS7p2Etp'
-b4_file_id = '1UWIMLa9_P4MgQpRSZvEIKgdgG7Ui28LA'
-b5_file_id = '1QI-ChYZRjPbGmV-su0kaMlYA_WA9KLx3'
 
-a_file_id = '16moWqNDr2g7qT7bIGnjH3Q5YR0cJ7hr-'
-b_file_id = '1vapIlKJL7Lb8-OgoJQCNZW-4DJWo9COi'
-a_plus_b = '1ybOOPQOQJCWVYBzWFwFNMw_iD3Xl8dGV'
+## aici vei folosi două reprezentări, cea descrisă in temă și cea din colab (cu dicționare)
+def gauss_seidel_solver1(matrix_df, target_df, n_dims, precision=7):
 
-n_dims = [10000, 20000, 30000, 80000, 2025]
+    epsilon = 10 ** (-precision)
+    diagonal = get_diagonal(matrix_df, n_dims)
+
+    diagonal_check = is_diagonal_null(diagonal)
+    print(f"does the diagonal contain any null element ? {diagonal_check}")
+
+    if diagonal_check is True:
+        print("Cannot perfrom gauss_seidel if any element from the diagonal is 0")   ## division by 0
+        return
+
+    rows = build_reprsesentation1(matrix_df, n_dims)
+    # print(rows[0:10])
+
+    x_prev = [0 for _ in range(n_dims)]
+    x_current = [0 for _ in range(n_dims)]
+
+    ## print norm ||matrix_df * x_found - b||_inf (adică maximul de pe rând)
 
 if __name__ == '__main__':
 
-    """
-    trebuie curățate și restul fișierelor de input
-    """
+    file_path_matrix = 'data/a1.csv'
+    file_path_target = 'data/b1.csv'
+    
+    matrix_df = import_data(file_path_matrix, reading_a=True)
+    target_df = import_data(file_path_target, reading_a=False)
 
-    df = import_data(a1_file_id, "a1.csv", reading_a=True)
-    df = clean_data(df, reading_a=True)
+    gauss_seidel_solver1(matrix_df, target_df, n_dims[0])
 
-    get_diagonal(df, n_dims[0])
+    # print(df.iloc[0]) ## accessing the first row
