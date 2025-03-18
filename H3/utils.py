@@ -76,7 +76,7 @@ def get_diagonal(df, n_dims):
 
 def build_reprsesentation1(df, n_dims):
 
-    rows = [[] for _ in range(n_dims)]
+    rows = [{} for _ in range(n_dims)]  ## a dictionary for each row;  {col:idx: accumulated_value}
     entries = df[df['row_idx'] != df['col_idx']]  # all, but the diagonal elements
     
     for _, row in entries.iterrows():
@@ -84,9 +84,38 @@ def build_reprsesentation1(df, n_dims):
         col_idx = int(row['col_idx'])
         value = int(row['value'])
 
-        rows[row_idx].append((value, col_idx))
+        if col_idx in rows[row_idx]:
+            rows[row_idx][col_idx] += value
+        else:
+            rows[row_idx][col_idx] = value
 
-    return rows
+    return [sorted(row.items()) for row in rows]
+
+def get_sum(row, x):
+    result = 0
+    for i in range(len(row)):
+        value, col_idx = row[i]
+        result += value * x[col_idx]
+    return result
+
+def get_product(rows, x_gs, n_dims, representation1):
+    
+    results = np.zeros(n_dims)
+    if representation1:
+        for i in range(n_dims):
+
+            current_result = []
+            current_row = rows[i]
+            values, col_idxes = rows[i]
+            
+            for value, col_idx in range(len(current_row)):
+                result += value * x_gs[col_idx]
+            
+            results[i] = current_result
+    else: 
+        pass
+
+    return results
 
 if __name__ == '__main__':
     pass
