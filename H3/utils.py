@@ -1,6 +1,7 @@
 import os
-import pandas as pd
 import gdown
+import numpy as np
+import pandas as pd
 from typing import List
 
 a1_file_id = '1DPNqhir87-JyFXzq0JZ6PzDRnzARcH8M'
@@ -74,48 +75,68 @@ def get_diagonal(df, n_dims):
 
     return diagonal
 
-def build_reprsesentation1(df, n_dims):
+def build_reprsesentation(df, n_dims, representation1):
 
     rows = [{} for _ in range(n_dims)]  ## a dictionary for each row;  {col:idx: accumulated_value}
-    entries = df[df['row_idx'] != df['col_idx']]  # all, but the diagonal elements
-    
+
+    if representation1:
+        entries = df[df['row_idx'] != df['col_idx']]  # all, but the diagonal elements
+    else:
+        entries = df
+
     for _, row in entries.iterrows():
         row_idx = int(row['row_idx'])
         col_idx = int(row['col_idx'])
-        value = int(row['value'])
+        value = float(row['value'])
 
         if col_idx in rows[row_idx]:
             rows[row_idx][col_idx] += value
         else:
             rows[row_idx][col_idx] = value
 
-    return [sorted(row.items()) for row in rows]
+    return [list(row.items()) for row in rows] if representation1 else rows
 
-def get_sum(row, x):
+
+def get_sum(row, x, i ):
     result = 0
-    for i in range(len(row)):
-        value, col_idx = row[i]
-        result += value * x[col_idx]
+
+    for col_idx, value in row:
+        if col_idx < i:
+            result += value * x[col_idx, 1]  ## already computed
+        else:
+            result += value * x[col_idx, 0]  ## the old value
     return result
 
-def get_product(rows, x_gs, n_dims, representation1):
+def get_product(rows, diagonal, x_gs, n_dims, representation1):
     
     results = np.zeros(n_dims)
     if representation1:
         for i in range(n_dims):
 
-            current_result = []
-            current_row = rows[i]
-            values, col_idxes = rows[i]
+            current_result = 0
+            for col_idx, value in rows[i]:
+                current_result += np.dot(value, x_gs[col_idx, 1])
             
-            for value, col_idx in range(len(current_row)):
-                result += value * x_gs[col_idx]
-            
-            results[i] = current_result
+            results[i] = current_result + diagonal[i]
     else: 
         pass
 
     return results
+
+def get_difference(arr, df_1d):
+
+    df_arr = []
+    for i in range(len(df_1d)):
+        df_arr.append(df_1d.values[i][0])
+
+    arr = np.array(arr)
+    df_arr = np.array(df_arr)
+    
+    print(f"Ax = {arr[0:10]}")
+    print(f"b = {df_arr[0:10]}")
+
+    return arr - df_arr
+
 
 if __name__ == '__main__':
     pass
