@@ -57,7 +57,7 @@ def clean_data(df, reading_a=True):
     return df
 
 def import_data(file_path, reading_a):
-    df = pd.read_csv(file_path, header=None)
+    df = pd.read_csv(file_path, header=None, skipinitialspace=True)
     df = clean_data(df, reading_a)
     return df
 
@@ -79,10 +79,8 @@ def build_reprsesentation(df, n_dims, representation1):
 
     rows = [{} for _ in range(n_dims)]  ## a dictionary for each row;  {col:idx: accumulated_value}
 
-    if representation1:
-        entries = df[df['row_idx'] != df['col_idx']]  # all, but the diagonal elements
-    else:
-        entries = df
+
+    entries = df[df['row_idx'] != df['col_idx']]  # all, but the diagonal elements
 
     for _, row in entries.iterrows():
         row_idx = int(row['row_idx'])
@@ -96,15 +94,31 @@ def build_reprsesentation(df, n_dims, representation1):
 
     return [list(row.items()) for row in rows] if representation1 else rows
 
-
-def get_sum(row, x, i ):
+def get_sum(row, x, i, representation1):
+    
     result = 0
 
-    for col_idx, value in row:
-        if col_idx < i:
-            result += value * x[col_idx, 1]  ## already computed
-        else:
-            result += value * x[col_idx, 0]  ## the old value
+    if representation1:
+        for col_idx, value in row:
+            
+            if col_idx == i:
+                continue
+
+            if col_idx < i:
+                result += value * x[col_idx, 1]  ## already computed
+            else:
+                result += value * x[col_idx, 0]  ## the old value
+    else:
+        for col_idx, value in row.items():
+            
+            if col_idx == i:
+                continue
+
+            if col_idx < i:
+                result += value * x[col_idx, 1]
+            else:
+                result += value * x[col_idx, 0]
+
     return result
 
 def get_product(rows, diagonal, x_gs, n_dims, representation1):
@@ -112,14 +126,19 @@ def get_product(rows, diagonal, x_gs, n_dims, representation1):
     results = np.zeros(n_dims)
     if representation1:
         for i in range(n_dims):
-
             current_result = 0
             for col_idx, value in rows[i]:
                 current_result += np.dot(value, x_gs[col_idx, 1])
             
-            results[i] = current_result + diagonal[i]
+            results[i] = current_result + diagonal[i] * x_gs[i, 1]
     else: 
-        pass
+        for i in range(n_dims):
+            current_result = 0
+            for col_idx, value in rows[i].items():
+                if col_idx == i:
+                    continue
+                current_result += np.dot(value, x_gs[col_idx, 1])
+            results[i] = current_result
 
     return results
 
@@ -139,4 +158,7 @@ def get_difference(arr, df_1d):
 
 
 if __name__ == '__main__':
-    pass
+    
+    file_path_matrix = 'data/a5.csv'
+    clean_csv(file_path_matrix)
+    import_data(file_path_matrix, reading_a=True)
