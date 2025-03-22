@@ -75,12 +75,14 @@ def get_diagonal(df, n_dims):
 
     return diagonal
 
-def build_reprsesentation(df, n_dims, representation1):
+def build_reprsesentation(df, n_dims, representation1, doing_addition=False):
 
     rows = [{} for _ in range(n_dims)]  ## a dictionary for each row;  {col:idx: accumulated_value}
 
-
-    entries = df[df['row_idx'] != df['col_idx']]  # all, but the diagonal elements
+    if not doing_addition:
+        entries = df[df['row_idx'] != df['col_idx']]  # all, but the diagonal elements
+    else:
+        entries = df
 
     for _, row in entries.iterrows():
         row_idx = int(row['row_idx'])
@@ -155,6 +157,38 @@ def get_difference(arr, df_1d):
     print(f"b = {df_arr[0:10]}")
 
     return arr - df_arr
+
+def merge_sparse_rows(row1, row2):
+
+    merged_rows = []
+    i,j = 0, 0
+    while i < len(row1) and j < len(row2):
+        
+        col_idx1, val1 = row1[i]
+        col_idx2, val2 = row2[j]
+
+        if col_idx1 == col_idx2:
+            merged_rows.append((col_idx1, val1 + val2))
+            i += 1
+            j += 1
+        elif col_idx1 > col_idx2:
+            merged_rows.append((col_idx2, val2))
+            j += 1
+        else:
+            merged_rows.append((col_idx1, val1))
+            i += 1
+    
+    ## append the remaining elements
+    while i < len(row1):
+        merged_rows.append(row1[i])
+        i += 1
+
+    while j < len(row2):
+        merged_rows.append(row2[j])
+        j += 1
+
+    return merged_rows 
+
 
 
 if __name__ == '__main__':
