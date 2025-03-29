@@ -11,7 +11,7 @@ def find_inverse(matrix, identity_matrix, method, num_iterations=10000, precisio
     matrix = np.array(matrix)
 
     epsilon = 10 ** (-precision)
-    delta_v = 10**3
+    delta_v = 10 **3
 
     k = 1
     while k < num_iterations + 1 and delta_v >= epsilon and delta_v <= 10 ** 10:
@@ -40,8 +40,8 @@ def find_inverse(matrix, identity_matrix, method, num_iterations=10000, precisio
 
 if __name__ == '__main__':
     
-    I = np.array(build_identity_matrix(6))
-    A = np.array(build_input_matrix(6))
+    I = np.array(build_identity_matrix(10))
+    A = np.array(build_input_matrix(10))
     method = "schultz" # schultz / li1 / li2
     find_inverse(A, I, method, num_iterations=10000)
 
