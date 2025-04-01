@@ -19,18 +19,18 @@ file_512  = 'data/marar_512.csv'
 file_256  = 'data/marar_256.csv'
 
 
-def find_eigenvector_eigenvalue(n_dims, input_df=None, precision = 10, max_iterations=10000):
+def find_eigenvector_eigenvalue(n_dims, input_df=None, precision = 12, max_iterations=100000):
 
 	if input_df is None:
 		rows = build_symmetric_matrix(n_dims=n_dims, sparsity=0.1, max_value=20)
 		print(f"Using a generated symmetric matrix")
 	else:
-		rows = build_reprsesentation(df, representation1=True, doing_addition=False)
+		rows = build_reprsesentation(df, n_dims=n_dims, representation1=True, doing_addition=False)
 		print(f"Using an already defined matrix")
 
 	epsilon = 10 ** (-precision)
 	
-	if is_matrix_symmetric(rows):
+	if is_matrix_symmetric(rows, epsilon):
 		print("Input matrix is symmetric")
 	else:
 		print("Input matrix is not symmetric, returning ..")
@@ -42,9 +42,6 @@ def find_eigenvector_eigenvalue(n_dims, input_df=None, precision = 10, max_itera
 	rayleigh_coefficient = 1
 	num_iterations = 0
 
-	## + nu este testat, deci habar n-am daca merge !! 
-
-	## aici s-ar putea sa trebuiasca ca matricile sa fie inmultite (,nu produs scalar, intre lambda si v)
 	while num_iterations < max_iterations and np.linalg.norm(current_w - np.dot(current_lambda, current_v)) >= n_dims * epsilon:
 		
 		pre_dot_v = current_v
@@ -62,13 +59,54 @@ def find_eigenvector_eigenvalue(n_dims, input_df=None, precision = 10, max_itera
 		return
 	
 	print(f"Eigenvector = {current_w} \neigenvalue = {rayleigh_coefficient}")
-	a_u_max = get_matrix_product(rows, current_w)
+	a_u_max = get_matrix_product(rows, current_w, n_dims)
 	lambda_u_max = np.dot(current_lambda, current_w)
-	print(f"norm = {np.linalg.norm(a_u_max, lambda_u_max)}")
+	print(f"norm = {np.linalg.norm(a_u_max - lambda_u_max)}")
+	print(f"result found after {num_iterations + 1} iterations")
+
+
+def svd_analysis(n_dim, p_dim, target, precision=12):
+
+    epsilon = 10 ** (-precision)
+
+    A = np.random.randn(n_dim, p_dim)
+    U, S, Vt = np.linalg.svd(A, full_matrices=False)
+    print("Valori singulare din A:", S)
+
+    # rangul matricii A, numarul de valori singulare pozitive
+    rank_A = np.sum(S > epsilon) 
+    print("Rangul lui A:", rank_A)
+
+    # numarul de conditionale, raportul dintre cea mai mare si cea mai mica valoare singulara
+    sigma_max = S[0]
+    sigma_min = S[rank_A - 1]  # The smallest nonzero singular value
+    condition_number = sigma_max / sigma_min
+    print("Condition number of A:", condition_number)
+
+    # pseudoinversa Moore-Penrose
+    S_inv = np.diag(1 / S[:rank_A])  # Inverting only nonzero singular values
+    A_pseudo_inv = np.dot(Vt.T[:, :rank_A], np.dot(S_inv, U.T[:rank_A, :]))
+    print("Moore-Penrose Pseudoinverse of A:\n", A_pseudo_inv)
+
+    x_I = np.dot(A_pseudo_inv, target)
+    print("Solution x_I:", x_I)
+
+    residual_norm = np.linalg.norm(target - np.dot(A, x_I))
+    print("Residual norm ||b - Ax_I||:", residual_norm)
+
+    return A, A_pseudo_inv, x_I, residual_norm
 
 
 if __name__ == '__main__':
 	
-	# df = import_data(file_256, reading_a=True)
-	
-	find_eigenvector_eigenvalue()
+	"""
+	df = import_data(file_4000, reading_a=True)
+	n_dims = 1234
+	find_eigenvector_eigenvalue(n_dims)
+	"""
+	# print(f"{0.1} + {0.2} = {0.1 + 0.2}")
+
+	n_dim = 7
+	p_dim = 5
+	target = np.random.randn(n_dim)
+	svd_analysis(n_dim, p_dim, target)

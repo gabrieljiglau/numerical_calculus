@@ -3,21 +3,14 @@ import numpy as np
 import pandas as pd
 
 
-def is_matrix_symmetric(rows):
+def is_matrix_symmetric(rows, epsilon):
 
     for row_idx in range(len(rows)):
         for col_idx, value in rows[row_idx]:
             
             found = False
 
-            if col_idx == row_idx:
-                continue
-            for row1, value1 in rows[col_idx]:
-                if row1 == row_idx and value1 == value:
-                    found = True
-                    break
-
-            if not found:
+            if not any(row == row_idx and abs(val - value) < epsilon for row, val in rows[col_idx]):
                 return False
     
     return True

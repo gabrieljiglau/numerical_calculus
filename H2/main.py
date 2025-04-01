@@ -2,8 +2,8 @@ import math
 
 import numpy as np
 
-from H2.utils import get_solution_lib, compute_vector_norm, compute_norm, compute_determinant, generate_random_matrix, \
-    generate_random_array
+from utils import compute_vector_norm, get_solution_lib, compute_norm, generate_random_array, generate_random_matrix, \
+    compute_determinant
 
 """
 gepeto pe baza: https://www.geeksforgeeks.org/doolittle-algorithm-lu-decomposition/
@@ -123,13 +123,12 @@ if __name__ == '__main__':
 
     precision = 10
 
-    """
-    forced_diagonal = [2, 3, 4]
+    forced_diagonal = [1, 1, 1]
 
     B = np.array([
-        [4, 2, 3],
-        [2, 7, 5.5],
-        [6, 3, 12.5]
+        [2.5, 2, 2],
+        [-5, -2, -3],
+        [5, 6, 6.5]
     ])
 
     
@@ -181,8 +180,8 @@ if __name__ == '__main__':
 
     print(f"Euclidean norm (||x_LU - x_lib||): {norm_1}")
     print(f"Euclidean norm (||x_LU - A_inv*b||): {norm_2}")
-    """
 
+    """
     arr = generate_random_matrix(n_dims=101)
     forced_diagonal = generate_random_array(n_dims=101)
     LU, diagL = luDecompositionCombined(arr, forced_diagonal, precision)
@@ -219,3 +218,4 @@ if __name__ == '__main__':
 
     print(f"Euclidean norm (||x_LU - x_lib||): {norm_1}")
     print(f"Euclidean norm (||x_LU - A_inv*b||): {norm_2}")
+    """
