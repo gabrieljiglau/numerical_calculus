@@ -14,6 +14,28 @@ def f2_trig(x_in):
 def f3_trig(x_in):
     return math.sin(x_in) ** 2 - math.cos(x_in) ** 2
 
+def eval_trig_function(trig_function, x_in):
+
+    if trig_function == 'f1':
+        return f1_trig(x_in)
+    elif trig_function == 'f2':
+        return f2_trig(x_in)
+    elif trig_function == 'f3':
+        return f3_trig
+    else:
+        print(f"Unkown input function specified \n")
+        print("Recognized names: f1, f2 or f3")
+        return -1
+
+def approximateT(x_coefficients, x_new, m):
+
+    result = 1  # fi0(x) = 1
+    for i in range(2 * m):
+        result += x_coefficients[i] * math.sin(i * x_new) if i % 2 == 0 else x_coefficients[i] * math.cos(i * x_new)
+
+    return result
+
+
 def approximate_with_horner(a_coefficients, x_new):
 
     result = a_coefficients[0]

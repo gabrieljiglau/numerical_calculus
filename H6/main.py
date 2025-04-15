@@ -1,12 +1,8 @@
 import math
 import numpy as np
-from utils import f_poly, approximate_with_horner, plot_function
+from utils import f_poly, approximate_with_horner, plot_function, eval_trig_function, approximateT
 
 pi = math.pi
-
-trig1_domain = [0, 31*pi/16]
-trig2_domain = trig1_domain
-trig3_domain = [0, 0, 63*pi/32]
 
 
 def poly_interpolation(num_points=1001, x_new = 2.33, max_degree=2):
@@ -64,11 +60,53 @@ def poly_interpolation(num_points=1001, x_new = 2.33, max_degree=2):
     return a_coefficients
 
 
-def trigonometric_interpolation():
-    pass
+## who is m ??
+def trigonometric_interpolation(m, trig_domain, trig_function, x_new=3/2 * pi): 
+
+    num_samples = 2 * m
+
+    x_samples = [trig_domain[0]]
+    x_samples.extend(np.random.uniform(low=trig_domain[0], high=trig_domain[1], size=num_samples))
+    x_samples.append(trig_domain[1])
+
+    T = np.zeros((num_samples + 1, num_samples + 1))
+    for i in range(num_samples + 1):  # row
+        for j in range(num_samples + 1):  # column
+            k = i + 1
+            if j == 0:
+                T[i][j] = 1
+            elif j % 2 == 1:
+                T[i][j] = math.sin(k * x_samples[i])
+            elif j % 2 == 0:
+                T[i][j] = math.cos(k * x_samples[i])
+    
+    eval_y = []
+    for x in x_samples:
+        y = eval_trig_function(trig_function, x)
+        eval_y.append(y)
+
+    # B * a = f
+    x_coefficients = np.linalg.solve(T, eval_y)
+    
+    eval_x_new = approximateT(x_coefficients, x_new, m)
+    print(f"T(x_new) = {eval_x_new}")
+
+    abs_diff = abs(eval_x_new - eval_trig_function(trig_domain, x_new))
+    print(f"|T(x_new) - f(x_new)| = {abs_diff}")
+
+    ## oare merge programul ?? nu, pentru ca ai o disconcordanță de mărimi pe vectori
+    ## verificarea calității soluțiilor 
+    ## plot și la funcțiile trigonometrice
 
 
 if __name__ == '__main__':
     
+    """
     poly_coefficients = poly_interpolation()
-    # plot_function(1, 5, "polinomului gasit de mine", poly_coefficients[::-1])
+    plot_function(1, 5, "polinomului gasit de mine", poly_coefficients[::-1])
+    """
+
+    trig1_domain = [0, 31*pi/16]     # f1
+    trig2_domain = trig1_domain      # f2
+    trig3_domain = [0, 0, 63*pi/32]  # f3
+    trigonometric_interpolation(10, trig1_domain, 'f1')
