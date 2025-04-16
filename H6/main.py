@@ -60,24 +60,23 @@ def poly_interpolation(num_points=1001, x_new = 2.33, max_degree=2):
     return a_coefficients
 
 
-## who is m ??
-def trigonometric_interpolation(m, trig_domain, trig_function, x_new=3/2 * pi): 
+def trigonometric_interpolation(maximum_frequency, trig_domain, trig_function, x_new=3/2 * pi): 
 
-    num_samples = 2 * m
 
-    x_samples = [trig_domain[0]]
-    x_samples.extend(np.random.uniform(low=trig_domain[0], high=trig_domain[1], size=num_samples))
-    x_samples.append(trig_domain[1])
+    ## maximum_frequency = maximum k used in sin and cos
+    num_samples = 2 * maximum_frequency + 1
+    x_samples = np.random.uniform(low=trig_domain[0], high=trig_domain[1], size=num_samples)
 
-    T = np.zeros((num_samples + 1, num_samples + 1))
-    for i in range(num_samples + 1):  # row
-        for j in range(num_samples + 1):  # column
-            k = i + 1
+    T = np.zeros((num_samples, num_samples))
+    for i in range(num_samples):  # row
+        for j in range(num_samples):  # column
             if j == 0:
                 T[i][j] = 1
             elif j % 2 == 1:
+                k = (j + 1) // 2
                 T[i][j] = math.sin(k * x_samples[i])
             elif j % 2 == 0:
+                k = j // 2
                 T[i][j] = math.cos(k * x_samples[i])
     
     eval_y = []
@@ -88,15 +87,15 @@ def trigonometric_interpolation(m, trig_domain, trig_function, x_new=3/2 * pi):
     # B * a = f
     x_coefficients = np.linalg.solve(T, eval_y)
     
-    eval_x_new = approximateT(x_coefficients, x_new, m)
+    eval_x_new = approximateT(x_coefficients, x_new, maximum_frequency)
+    print(f"f(x_new) = {eval_trig_function(trig_function, x_new)}")
     print(f"T(x_new) = {eval_x_new}")
 
-    abs_diff = abs(eval_x_new - eval_trig_function(trig_domain, x_new))
+    abs_diff = abs(eval_x_new - eval_trig_function(trig_function, x_new))
     print(f"|T(x_new) - f(x_new)| = {abs_diff}")
 
-    ## oare merge programul ?? nu, pentru ca ai o disconcordanță de mărimi pe vectori
-    ## verificarea calității soluțiilor 
-    ## plot și la funcțiile trigonometrice
+    return x_coefficients
+
 
 
 if __name__ == '__main__':
@@ -109,4 +108,8 @@ if __name__ == '__main__':
     trig1_domain = [0, 31*pi/16]     # f1
     trig2_domain = trig1_domain      # f2
     trig3_domain = [0, 0, 63*pi/32]  # f3
-    trigonometric_interpolation(10, trig1_domain, 'f1')
+    
+    m = 4
+    trig_coef = trigonometric_interpolation(m, trig1_domain, 'f1')
+    plot_function(trig1_domain[0], trig1_domain[1], "functiei trigonometrice", trig_coef, 
+                    trig_interpolation=True, m =4)
