@@ -1,6 +1,6 @@
 import math
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 def build_first_matrix(matrix, precision):
     
@@ -108,6 +108,26 @@ def inverse_matrix(n_dims):
     I, J = np.indices((n_dims, n_dims))
     inv = np.where(I >= J, (-2.0) ** (I - J), 0)
     return inv
+
+def plot_convergence(methods, iterations, matrix_size):
+    
+    bars = plt.bar(methods, iterations, color='skyblue', edgecolor='black')
+    
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height,
+                f'{int(height)}',
+                ha='center', va='bottom')
+    
+    plt.xlabel('Method')
+    plt.ylabel('Number of Iterations')
+    plt.title(f'Iterations to Converge to Matrix Inverse (Size {matrix_size})')
+
+    
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()
+
 
 if __name__ == '__main__':
 

@@ -34,16 +34,25 @@ def find_inverse(matrix, identity_matrix, method, num_iterations=10000, precisio
         print(f"true_inv = {true_inv}")
 
         print(f"norm||true_inv - found_inv|| = {np.linalg.norm(current_vk - true_inv)}")
+
+        return k - 1
     else:
         print("Divergence !!")
+        return num_iterations
 
 
 if __name__ == '__main__':
     
     I = np.array(build_identity_matrix(10))
     A = np.array(build_input_matrix(10))
-    method = "schultz" # schultz / li1 / li2
-    find_inverse(A, I, method, num_iterations=10000)
+    methods = ["schultz", "li1", "li2"]
+    iterations = []
+
+    for method in methods:
+        iters = find_inverse(A, I, method, num_iterations=10000)
+        iterations.append(iters)
+
+    plot_convergence(methods, iterations, matrix_size=10)
 
     # print(inverse_matrix(5))
     # print(np.linalg.inv(A))

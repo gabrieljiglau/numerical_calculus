@@ -1,17 +1,13 @@
 import sys
 import numpy as np
 import math
-from utils7 import horner, derivata, radacini_distincte
+import matplotlib.pyplot as plt
+from utils7 import horner, derivata, radacini_distincte, plot_polynomial_with_roots, interval_radacini
 
 original_stdout = sys.stdout
 
 with open('output.txt', 'w', encoding='utf-8') as f:
     sys.stdout = f  # Change the standard output to the file we created
-    def interval_radacini(coef):
-        """Calculează intervalul [-R, R] unde se află rădăcinile reale."""
-        A = max(abs(c) for c in coef[1:])  # pentru primul: 11
-        R = (abs(coef[0]) + A) / abs(coef[0])  # pentru primul: (1 + 11) / 1
-        return (-R, R)
 
     def halley(coef, x, epsilon, kmax):
         """Implementează metoda lui Halley pentru aproximarea rădăcinilor."""
@@ -25,7 +21,7 @@ with open('output.txt', 'w', encoding='utf-8') as f:
             if abs(A) < epsilon:
                 #print("Posibila eroare, A este prea mic")
                 #print(f"Halley1: {x} la iteratia {k}")
-                return "esuata"
+                A = 100 * epsilon
             delta = 2 * P * dP / A
             x = x - delta
             if abs(delta) < epsilon:
@@ -114,7 +110,7 @@ with open('output.txt', 'w', encoding='utf-8') as f:
     ]
 
         # Parametri
-    epsilon = 1e-10
+    epsilon = 1e-6
     kmax = 5000
     step = 0.1
     #fixed_test_values = [1, 2, 3, 2/3, 1/7, -1, 1.5, 0.5, 0.25]
@@ -124,7 +120,7 @@ with open('output.txt', 'w', encoding='utf-8') as f:
         # Calculul rădăcinilor pentru fiecare polinom
     for coef in polinoame:
         interval = interval_radacini(coef)
-        print(f"\nIntervalul rădăcinilor pentru {coef}: {interval}")
+        #print(f"\nIntervalul rădăcinilor pentru {coef}: {interval}")
         radacini_halley = []
         radacini_newton4 = []
         radacini_newton5 = []
@@ -142,6 +138,8 @@ with open('output.txt', 'w', encoding='utf-8') as f:
         radacini_dist_halley = radacini_distincte(radacini_halley, epsilon)
         radacini_dist_newton4 = radacini_distincte(radacini_newton4, epsilon)
         radacini_dist_newton5 = radacini_distincte(radacini_newton5, epsilon)
+
+        plot_polynomial_with_roots(coef, radacini_dist_halley, radacini_dist_newton4, radacini_dist_newton5)
 
         print(f"\nRădăcini distincte pentru metoda Halley: {coef}: {radacini_dist_halley}")
 
@@ -161,5 +159,6 @@ with open('output.txt', 'w', encoding='utf-8') as f:
         for r in radacini_dist_newton5:
             valoare = horner(coef, r)
             print(f"P({r:.12f}) = {valoare:.2e}")
+
 
     sys.stdout = original_stdout  # Reset the standard output to its original value
